@@ -2,6 +2,7 @@
 #include "pros/abstract_motor.hpp"
 #include "pros/misc.h"
 #include "pros/motors.hpp"
+#include "lemlib/api.hpp" // IWYU pragma: keep
 
 /**
  * A callback function for LLEMU's center button.
