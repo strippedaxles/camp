@@ -1,10 +1,12 @@
 #include "main.h"
+#include "lemlib/asset.hpp"
 #include "lemlib/chassis/trackingWheel.hpp"
 #include "pros/abstract_motor.hpp"
 #include "pros/misc.h"
 #include "pros/motor_group.hpp"
 #include "pros/motors.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "pros/rtos.hpp"
 #include <cstddef>
 
 /**
@@ -39,24 +41,24 @@ lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel 1, set to null
 );
 
 // lateral PID controller
-lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
+lemlib::ControllerSettings lateral_controller(10.6, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              3, // derivative gain (kD)
-                                              3, // anti windup
-                                              1, // small error range, in inches
-                                              100, // small error range timeout, in milliseconds
-                                              3, // large error range, in inches
-                                              500, // large error range timeout, in milliseconds
-                                              20 // maximum acceleration (slew)
+                                              5, // derivative gain (kD)
+                                              0, // anti windup
+                                              0.5, // small error range, in inches
+                                              250, // small error range timeout, in milliseconds
+                                              1, // large error range, in inches
+                                              750, // large error range timeout, in milliseconds
+                                              0 // maximum acceleration (slew)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angular_controller(2, // proportional gain (kP)
+lemlib::ControllerSettings angular_controller(3.47, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              10, // derivative gain (kD)
-                                              3, // anti windup
-                                              1, // small error range, in degrees
-                                              100, // small error range timeout, in milliseconds
+                                              20, // derivative gain (kD)
+                                              0, // anti windup
+                                              0.5, // small error range, in degrees
+                                              150, // small error range timeout, in milliseconds
                                               3, // large error range, in degrees
                                               500, // large error range timeout, in milliseconds
                                               0 // maximum acceleration (slew)
@@ -92,8 +94,7 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
  */
 void initialize() {
 	chassis.calibrate();
-
-	// print position to brain screen
+    pros::lcd::initialize();
     pros::Task screen_task([&]() {
         while (true) {
             // print robot location to the brain screen
@@ -135,7 +136,12 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+ASSET(circleMiddle_txt);
+
+void autonomous() {
+    chassis.setPose(0,-72,0); 
+    chassis.follow(circleMiddle_txt, 15, 20000);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
